@@ -249,7 +249,7 @@ class Dataset(torch.utils.data.Dataset):
             else:
                 self.logger.info("Stop download.")
                 exit(-1)
-            torch.distributed.barrier()
+            # torch.distributed.barrier()
         else:
             torch.distributed.barrier()
 

@@ -64,6 +64,8 @@ if __name__ == "__main__":
         "topk": [20],
         "metrics": ["Recall", "MRR"],
         "valid_metric": "MRR@20",
+        'train_neg_sample_args': None,
+
     }
 
     config = Config(
