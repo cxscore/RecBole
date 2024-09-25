@@ -22,7 +22,8 @@ from recbole.config import Config
 from recbole.data import create_dataset
 from recbole.data.utils import get_dataloader
 from recbole.utils import init_logger, init_seed, get_model, get_trainer, set_color
-
+import ssl 
+ssl._create_default_https_context = ssl._create_unverified_context
 
 def get_args():
     parser = argparse.ArgumentParser()
