@@ -24,7 +24,7 @@ class T4Rec(SequentialRecommender):
     def __init__(self, config, dataset):
         super(T4Rec, self).__init__(config, dataset)
 
-        d_model = 320
+        d_model = 64
         max_sequence_length = 10
 
         # Create a Schema
@@ -41,7 +41,7 @@ class T4Rec(SequentialRecommender):
     
         input_module = tr.TabularSequenceFeatures.from_schema(
             schema,
-            embedding_dim_default=128,
+            # embedding_dim_default=128,
             max_sequence_length=max_sequence_length,
             # continuous_projection=64,
             aggregation="concat",
