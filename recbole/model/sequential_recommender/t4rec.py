@@ -30,7 +30,7 @@ class T4Rec(SequentialRecommender):
         # Create a Schema
         schema = Schema([
             # create_categorical_column('item_id', max_sequence_length)
-            ColumnSchema(name='item_id', tags=[Tags.CATEGORICAL], dtype=np.int32, is_list=True, properties={
+            ColumnSchema(name='item_id', tags=[Tags.CATEGORICAL, Tags.ITEM_ID], dtype=np.int32, is_list=True, properties={
                "domain": {"name": 'item_id', "min": 0, "max": 10},
                "value_count": { "min": 0, "max": 100}
 
@@ -46,7 +46,7 @@ class T4Rec(SequentialRecommender):
             # continuous_projection=64,
             aggregation="concat",
             d_output=d_model,
-            # masking="mlm",            
+            masking="mlm",            
         )
       
         # Define Next item prediction-task 
@@ -62,9 +62,8 @@ class T4Rec(SequentialRecommender):
 
 
     def calculate_loss(self, interaction):
-        ret = self.model.forward(item_seq)
         item_seq = interaction[self.ITEM_SEQ]
-        ret = self.model.forward(item_seq)
+        ret = self.model.forward({'item_id': item_seq}, training=True)
         loss = ret['loss']
         return loss
         
