@@ -57,6 +57,9 @@ if __name__ == "__main__":
 
     # configurations initialization
     config_dict = {
+        # "use_gpu": False,
+        "epochs": 1000,
+        # "train_batch_size": 128,
         "USER_ID_FIELD": "session_id",
         "load_col": None,
         "neg_sampling": None,
@@ -66,6 +69,8 @@ if __name__ == "__main__":
         "metrics": ["Recall", "MRR"],
         "valid_metric": "MRR@20",
         'train_neg_sample_args': None,
+        'MAX_ITEM_LIST_LENGTH': 80,
+        "hidden_size": 64,
 
     }
 

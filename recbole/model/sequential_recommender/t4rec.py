@@ -25,21 +25,21 @@ class T4Rec(SequentialRecommender):
         super(T4Rec, self).__init__(config, dataset)
 
         d_model = 64
-        max_sequence_length = 10
-
+        max_sequence_length = 80
+        self.item_num = dataset.item_num
         # Create a Schema
         schema = Schema([
             # create_categorical_column('item_id', max_sequence_length)
             ColumnSchema(name='item_id', tags=[Tags.CATEGORICAL, Tags.ITEM_ID], dtype=np.int32, is_list=True, properties={
-               "domain": {"name": 'item_id', "min": 0, "max": 10},
-               "value_count": { "min": 0, "max": 100}
+               "domain": {"name": 'item_id', "min": 0, "max": dataset.item_num-1},
+               "value_count": { "min": 0, "max": max_sequence_length}
 
             })
         ])
         print("shema is ", schema)
 
     
-        input_module = tr.TabularSequenceFeatures.from_schema(
+        self.input_module = tr.TabularSequenceFeatures.from_schema(
             schema,
             # embedding_dim_default=128,
             max_sequence_length=max_sequence_length,
@@ -57,8 +57,9 @@ class T4Rec(SequentialRecommender):
         )
 
         # Get the end-to-end model 
-        self.model = transformer_config.to_torch_model(input_module, prediction_task)
-       
+        self.model = transformer_config.to_torch_model(self.input_module, prediction_task)
+        # device = torch.device("cuda")
+        # self.model.to(device)
 
 
     def calculate_loss(self, interaction):
@@ -80,4 +81,18 @@ class T4Rec(SequentialRecommender):
         scores = torch.mul(seq_output, test_item_emb).sum(dim=1)  # [B]
         return scores
 
-    
+    def full_sort_predict(self, interaction):
+        item_seq = interaction[self.ITEM_SEQ]  # [B Len]
+        test_item = interaction[self.ITEM_ID]
+
+        seq_output = self.model.forward({'item_id': item_seq}, training=False, testing=True)  # [B H]
+        output_onehot = torch.argmax(seq_output['predictions'], dim=-1)
+        output_emb = self.input_module.item_embedding_table(output_onehot)
+        test_item_emb = self.input_module.item_embedding_table.weight  # [B H]
+      
+        scores = torch.matmul(
+            output_emb, test_item_emb.transpose(0, 1)
+        )  # [B, n_items]
+        # somehow the nvidia models return array with length item_num+1
+        # return scores[:,:self.item_num]
+        return scores
